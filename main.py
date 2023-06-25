@@ -42,7 +42,7 @@ test.shape
 
 train.isnull().sum()
 test.isnull().sum()
-
+#region Preprocessing
 train_copy = train.copy()
 train_copy["OriginalTweet"] = train_copy["OriginalTweet"].apply(lambda x: " ".join(x for x in x.split() if not x.startswith("http")))
 train_copy["OriginalTweet"] = train_copy["OriginalTweet"].apply(lambda x: " ".join(re.sub("[^A-Za-z@#]", "", x) for x in x.split()))
@@ -70,15 +70,16 @@ train_last = train_copy.copy()
 train_last["Sentiment"].value_counts()
 train_last = train_last[train_last["Sentiment"] != "Neutral"]
 train_last = train_last.reset_index(drop=True)
+#endregion
 
 X = train_last["OriginalTweet"]
 y = train_last["Sentiment"]
 X.shape
 y.shape
 y = y.apply(lambda x: 0 if x == "Extremely Negative" else x)
-y = y.apply(lambda x: 1 if x == "Negative" else x)
-y = y.apply(lambda x: 2 if x == "Positive" else x)
-y = y.apply(lambda x: 3 if x == "Extremely Positive" else x)
+y = y.apply(lambda x: 0 if x == "Negative" else x)
+y = y.apply(lambda x: 1 if x == "Positive" else x)
+y = y.apply(lambda x: 1 if x == "Extremely Positive" else x)
 y.value_counts()
 
 X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, random_state=42)
@@ -102,8 +103,8 @@ X_train_cv, X_test_cv = vectorize(CV, X_train, X_test)
 tfidf_Vec_word = TfidfVectorizer()
 X_train_tfidf_Vec_word, X_test_tfidf_Vec_word = vectorize(tfidf_Vec_word, X_train, X_test)
 
-# tfidf_Vec_ngrams = TfidfVectorizer(ngram_range=(2, 3))
-# X_train_tfidf_Vec_ngrams, X_test_tfidf_Vec_ngrams = vectorize(tfidf_Vec_ngrams, X_train, X_test)
+tfidf_Vec_ngrams = TfidfVectorizer(ngram_range=(2, 3))
+X_train_tfidf_Vec_ngrams, X_test_tfidf_Vec_ngrams = vectorize(tfidf_Vec_ngrams, X_train, X_test)
 
 tfidf_Vec_chars = TfidfVectorizer(analyzer="char", ngram_range=(2, 3))
 X_train_tfidf_Vec_chars, X_test_tfidf_Vec_chars = vectorize(tfidf_Vec_chars, X_train, X_test)
